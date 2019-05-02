@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Node Simple Chat</title>
+  <script src="./js/socket.io-client//dist/socket.io.js"></script>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <form id="chat">
+        <input type="text" name="username"  id="username" placeholder="Digite seu usuário">
+        <div class="messages" id="dash"></div>
+        <input type="text" name="message" placeholder="Digite sua mensagem" id="message">
+        <button  type="submit">Enviar</button>
+    </form>
+
+  <script>
+      const chat=document.getElementById('chat');
+     function renderMessage(message){
+       const messageContent=`<div class="message"><strong>${message.author}</strong>: <strong>${message.message}</strong></div>`;
+       const dash=document.getElementById('dash');
+       dash.innerHTML +=messageContent;
+     }
+  
+      let socket=io('localhost:3000');
+
+
+      socket.on('previousMessage', function(messages){
+        for(message of messages){
+          renderMessage(message);
+        }
+      })
+      socket.on('receivedMessage', function(message){
+        renderMessage(message);
+      })
+
+      chat.addEventListener('submit',(event)=>{
+        event.preventDefault();
+       
+      
+        let author=document.getElementById('username').value;;
+        let message=document.getElementById('message').value;;
+       
+
+          if(author.length && message.length){
+            let messageObject={
+                author:author,
+                message:message
+            };
+
+            renderMessage(messageObject);
+            socket.emit('sendMessage',messageObject);
+          }
+
+        
+      });
+
+
+  </script>
+</body>
+</html>
